@@ -1,5 +1,3 @@
-public
-
 import java.util.Arrays;
 
 class Leetcode14 {
@@ -31,6 +29,4 @@ class Solution {
 
         return ans.toString();
     }
-}{
-
 }
