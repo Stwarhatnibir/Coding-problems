@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class Leetcode2267 {
 
     static class Solution {
@@ -7,54 +9,80 @@ public class Leetcode2267 {
             int m = grid.length;
             int n = grid[0].length;
 
-            // A valid parentheses string must have even length.
-            if ((m + n - 1) % 2 != 0) {
+            int length = m + n - 1;
+
+            // Valid parentheses string must have even length.
+            if (length % 2 != 0) {
                 return false;
             }
 
-            // Start must be '(' and end must be ')'.
+            // Must start with '(' and end with ')'.
             if (grid[0][0] != '(' ||
-                    grid[m - 1][n - 1] != ')') {
+                grid[m - 1][n - 1] != ')') {
                 return false;
             }
 
-            boolean[][][] dp = new boolean[m][n][m + n];
+            boolean[][][] dp =
+                    new boolean[m][n][length + 1];
 
-            // Starting cell
+            // First cell is '('
             dp[0][0][1] = true;
 
             for (int i = 0; i < m; i++) {
 
                 for (int j = 0; j < n; j++) {
 
-                    // Starting cell already initialized
                     if (i == 0 && j == 0) {
                         continue;
                     }
 
-                    int value = grid[i][j] == '(' ? 1 : -1;
+                    int change =
+                            grid[i][j] == '(' ? 1 : -1;
 
-                    for (int balance = 0; balance < m + n; balance++) {
+                    /*
+                     * previousBalance is the balance
+                     * BEFORE entering this cell.
+                     *
+                     * It can never be negative.
+                     */
+                    for (int previousBalance = 0;
+                         previousBalance < length;
+                         previousBalance++) {
 
-                        int previousBalance = balance - value;
+                        boolean canReach = false;
 
-                        if (previousBalance < 0) {
+                        // From above
+                        if (i > 0 &&
+                            dp[i - 1][j][previousBalance]) {
+
+                            canReach = true;
+                        }
+
+                        // From left
+                        if (j > 0 &&
+                            dp[i][j - 1][previousBalance]) {
+
+                            canReach = true;
+                        }
+
+                        if (!canReach) {
                             continue;
                         }
 
-                        // Come from above
-                        if (i > 0 &&
-                                dp[i - 1][j][previousBalance]) {
+                        int newBalance =
+                                previousBalance + change;
 
-                            dp[i][j][balance] = true;
+                        // Balance can never become negative.
+                        if (newBalance < 0) {
+                            continue;
                         }
 
-                        // Come from left
-                        if (j > 0 &&
-                                dp[i][j - 1][previousBalance]) {
-
-                            dp[i][j][balance] = true;
+                        // Safety check.
+                        if (newBalance > length) {
+                            continue;
                         }
+
+                        dp[i][j][newBalance] = true;
                     }
                 }
             }
@@ -68,9 +96,10 @@ public class Leetcode2267 {
         Solution solution = new Solution();
 
         char[][] grid = {
-                { '(', '(', '(' },
-                { '(', '(', ')' },
-                { '(', '(', ')' }
+            {'(', '(', '('},
+            {')', '(', ')'},
+            {'(', '(', ')'},
+            {'(', '(', ')'}
         };
 
         boolean result = solution.hasValidPath(grid);
